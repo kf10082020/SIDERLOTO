@@ -1,18 +1,26 @@
-﻿import requests
+import os
+import requests
 from bs4 import BeautifulSoup
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
-# Вставьте сюда ваш токен, полученный у @BotFather
-TOKEN = '8098389316:AAEMKwE8BN-BVIOQJLAFHMR2au3WkYSHRlU'
+# Вставьте сюда ваш токен
+TOKEN = 'ВАШ_ТОКЕН_ТУТ'
 
-# Функции парсинга для сайта
+# Функция парсинга сайта
 def get_results(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    # Эта часть зависит от реальной структуры сайта
-    # В этом примере — просто возвращается вся страница
-    return soup.get_text(strip=True)
+    try:
+        response = requests.get(url)
+        print(f"Запрос к {url} вернул статус {response.status_code}")
+        if response.status_code != 200:
+            return f"Ошибка: сайт недоступен (статус {response.status_code})"
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # В данном примере просто возвращаю часть текста — адаптируйте под структуру сайта
+        text = soup.get_text(separator=' ', strip=True)
+        return text[:1000]  # Ограничение длины для отображения
+    except Exception as e:
+        print(f"Ошибка парсинга: {e}")
+        return "Ошибка при получении данных"
 
 # Обработчик /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -26,7 +34,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text('Выберите игру:', reply_markup=reply_markup)
 
-# Обработчик нажатий
+# Обработчик нажатий кнопок
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -43,12 +51,13 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         results = get_results(url)
         await query.edit_message_text(text=f"Результаты:\n{results}")
     elif query.data == 'make_bet':
-        await query.edit_message_text(text="Функционал для ставки еще разрабатывается...")
+        await query.edit_message_text(text="Функционал для ставки еще в разработке...")
 
-# Главная функция
+# Основная часть
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler('start', start))
     app.add_handler(CallbackQueryHandler(button))
+    print("Бот запущен")
     app.run_polling()
