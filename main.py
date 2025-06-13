@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
 # Вставьте сюда ваш токен, полученный у @BotFather
-TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN_HERE'
+TOKEN = '8098389316:AAEMKwE8BN-BVIOQJLAFHMR2au3WkYSHRlU'
 
 # Функции парсинга для сайта
 def get_results(url):
