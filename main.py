@@ -1,4 +1,3 @@
-import os
 import requests
 from bs4 import BeautifulSoup
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -11,18 +10,27 @@ TOKEN = '8098389316:AAEMKwE8BN-BVIOQJLAFHMR2au3WkYSHRlU'
 def get_results(url):
     try:
         response = requests.get(url)
-        print(f"Запрос к {url} вернул статус {response.status_code}")
+        print(f"Запрос к {url} — статус: {response.status_code}")
         if response.status_code != 200:
             return f"Ошибка: сайт недоступен (статус {response.status_code})"
         soup = BeautifulSoup(response.text, 'html.parser')
-        # В данном примере просто возвращаю часть текста — адаптируйте под структуру сайта
-        text = soup.get_text(separator=' ', strip=True)
-        return text[:1000]  # Ограничение длины для отображения
+        # ВАЖНО: нужные результаты нужно найти в правильном блоке. Ниже пример.
+        # Напишите селектор, соответствующий структуре сайта.
+        # Ниже — общий пример получения текста, адаптируйте под сайт.
+        # Пример: все результаты в таблице с классом 'result-table'
+        result_block = soup.find('div', class_='result')  # Замените на правильный селектор
+        if result_block:
+            text = result_block.get_text(separator='\n', strip=True)
+            return text[:2000]  # Ограничение длины
+        else:
+            # Если не нашли, возвращаем весь текст страницы — или сообщение
+            full_text = soup.get_text(separator=' ', strip=True)
+            return full_text[:2000]
     except Exception as e:
         print(f"Ошибка парсинга: {e}")
         return "Ошибка при получении данных"
 
-# Обработчик /start
+# Обработчик команды /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("Лотерея 6/52", callback_data='6_52')],
@@ -34,10 +42,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text('Выберите игру:', reply_markup=reply_markup)
 
-# Обработчик нажатий кнопок
+# Обработчик нажатия кнопок
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    print(f"Кнопка нажата: {query.data}")
 
     url_mapping = {
         '6_52': 'https://unl.ua/uk/games/superloto/results',
@@ -53,7 +62,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'make_bet':
         await query.edit_message_text(text="Функционал для ставки еще в разработке...")
 
-# Основная часть
+# Основная часть запуска
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
 
