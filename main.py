@@ -5,7 +5,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
 # Вставьте сюда ваш токен
-TOKEN = 'ВАШ_ТОКЕН_ТУТ'
+TOKEN = '8098389316:AAEMKwE8BN-BVIOQJLAFHMR2au3WkYSHRlU'
 
 # Функция парсинга сайта
 def get_results(url):
